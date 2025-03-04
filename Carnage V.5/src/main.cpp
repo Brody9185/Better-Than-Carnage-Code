@@ -8,6 +8,39 @@
 // https://ez-robotics.github.io/EZ-Template/
 /////
 
+int ColorSort;
+bool WrongColor;
+
+
+pros::Task colorSortTask([]() {
+  pros::delay(2000);
+  colorsort.set_led_pwm(100);
+  while (true) {
+    // Red Sorting
+    if( ColorSort == 1){
+      if(colorsort.get_hue() < 40 && colorsort.get_hue() > 12){
+        WrongColor = true;
+      }
+    }
+    //Blue Sorting
+    if(ColorSort == 2){
+      if(colorsort.get_hue() < 220 && colorsort.get_hue() > 180){
+        WrongColor = true;
+      }
+    }
+    //Sort
+    if(WrongColor){
+      pros::delay(175);
+      setIntake(127);
+      pros::delay(250);
+      setIntake(-127);
+      WrongColor = false;
+    }
+    pros::delay(ez::util::DELAY_TIME);
+    }
+  }
+);
+
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
@@ -241,6 +274,9 @@ void opcontrol() {
   chassis.drive_brake_set(pros::E_MOTOR_BRAKE_HOLD);
 
   while (true) {
+    if(!WrongColor){
+      setIntake((master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)-master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))*-127);
+  }
     // Gives you some extras to make EZ-Template ezier
     ez_template_extras();
 
